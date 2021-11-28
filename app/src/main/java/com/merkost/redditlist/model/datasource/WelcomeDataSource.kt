@@ -33,7 +33,6 @@ class WelcomeDataSource(private val repository: RedditRepository) : PagingSource
                 nextKey = if (welcomeData.data.children.isEmpty()) null else welcomeData.data.after
             )
 
-
         } catch (exception: IOException) {
             return LoadResult.Error(exception)
         } catch (exception: HttpException) {
