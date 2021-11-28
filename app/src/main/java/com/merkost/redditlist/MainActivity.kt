@@ -3,6 +3,8 @@ package com.merkost.redditlist
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,11 +30,13 @@ import com.merkost.redditlist.viewmodels.MainViewModel
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import org.koin.androidx.compose.get
+import java.lang.reflect.Array.get
 
 private val Color.Companion.LightBlue: Color
     get() { return Color(android.graphics.Color.parseColor("#" + "ADD8E6")) }
 
 class MainActivity : ComponentActivity() {
+    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -41,9 +45,10 @@ class MainActivity : ComponentActivity() {
                 val viewModel: MainViewModel = get()
                 val redditList = viewModel.currentContent.collectAsState()
                 Surface(color = Color.LightGray) {
-                    if (redditList.value.isNullOrEmpty()) {
+                    AnimatedVisibility (redditList.value.isNullOrEmpty()) {
                         EmptyView()
-                    } else {
+                    }
+                    AnimatedVisibility (redditList.value.isNotEmpty()){
                         //Image(painterResource(R.drawable.reddit_logo), "")
                         //Greeting("Android")
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -68,7 +73,7 @@ fun EmptyView() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("Loading movies")
+            Text("Loading hot posts")
             Spacer(modifier = Modifier.size(8.dp))
             CircularProgressIndicator()
         }
@@ -90,7 +95,6 @@ private fun RedditItem(post: ChildData) {
                     Icon(Icons.Default.KeyboardArrowUp, "")
                 }
 
-
                 Text(getVotesNumber(post.score))
 
                 IconButton(onClick = {}) {
@@ -105,6 +109,9 @@ private fun RedditItem(post: ChildData) {
             ) {
 
                 Text("Posted by u/${post.author} ${getDate(post.createdUTC.toLong())}", style = MaterialTheme.typography.caption)
+
+
+                Text("${post.postHint}", style = MaterialTheme.typography.caption)
                 Text(post.title, style = MaterialTheme.typography.h6)
                 CoilImage(
                     imageModel = post.url,

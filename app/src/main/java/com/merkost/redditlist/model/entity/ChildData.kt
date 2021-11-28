@@ -122,7 +122,7 @@ data class ChildData (
     val gildings: DataGildings,
 
     @SerializedName("post_hint")
-    val postHint: PostHint? = null,
+    val postHint: String? = null,
 
     @SerializedName("content_categories")
     val contentCategories: Any? = null,
