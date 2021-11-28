@@ -6,14 +6,14 @@ import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -37,8 +35,7 @@ import androidx.paging.compose.items
 import com.merkost.redditlist.model.entity.ChildData
 import com.merkost.redditlist.model.entity.Children
 import com.merkost.redditlist.model.entity.PostHint
-import com.merkost.redditlist.utils.getDate
-import com.merkost.redditlist.utils.getVotesNumber
+import com.merkost.redditlist.utils.*
 import com.merkost.redditlist.viewmodels.MainViewModel
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
@@ -53,11 +50,12 @@ fun RedditListScreen() {
     val data = viewModel.children
 
     //val redditList = viewModel.currentContent.collectAsState()
-    Scaffold(backgroundColor = Color.LightGray) {
+    Scaffold(backgroundColor = Color.MyLightGray) {
         ConstraintLayout {
             val (list, loadingView) = createRefs()
 
-            AnimatedVisibility(visible = shouldShowLoadingView.value,
+            AnimatedVisibility(
+                visible = shouldShowLoadingView.value,
                 enter = fadeIn(animationSpec = tween(300)),
                 exit = fadeOut(animationSpec = tween(300)),
                 modifier = Modifier.constrainAs(loadingView) {
@@ -73,15 +71,13 @@ fun RedditListScreen() {
 
             val listItems: LazyPagingItems<Children> = data.collectAsLazyPagingItems()
             LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp),
-            modifier = Modifier.fillMaxSize().zIndex(1f).constrainAs(list) {
-                top.linkTo(parent.top)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                bottom.linkTo(parent.bottom)
-            }) {
-
+                modifier = Modifier.fillMaxSize().zIndex(1f).constrainAs(list) {
+                    top.linkTo(parent.top)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                    bottom.linkTo(parent.bottom)
+                }) {
                 items(listItems) { children ->
-
                     children?.let {
                         RedditItem(it.data)
                     }
@@ -100,7 +96,7 @@ fun RedditListScreen() {
                     loadState.append is LoadState.Error -> {
                         //You can use modifier to show error message
                     }
-                    loadState.append is LoadState.NotLoading  -> {
+                    loadState.append is LoadState.NotLoading -> {
                         shouldShowLoadingView.value = false
                     }
                 }
@@ -166,9 +162,9 @@ private fun RedditItem(post: ChildData) {
 
     Card(modifier = Modifier.padding(4.dp)) {
 
-        Row(modifier = Modifier.fillMaxSize().padding(4.dp)) {
+        Row(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxHeight().weight(2f).fillMaxWidth(),
+                modifier = Modifier.fillMaxHeight().weight(2f).fillMaxWidth().background(Color.MyLightBlue),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
 
@@ -177,7 +173,7 @@ private fun RedditItem(post: ChildData) {
                     Icon(Icons.Default.KeyboardArrowUp, "")
                 }
 
-                Text(getVotesNumber(post.score))
+                Text(getVotesNumber(post.score), overflow = TextOverflow.Visible)
 
                 IconButton(onClick = { }) {
                     Icon(Icons.Default.KeyboardArrowDown, "")
@@ -185,52 +181,130 @@ private fun RedditItem(post: ChildData) {
 
             }
             Column(
-                modifier = Modifier.weight(14f).fillMaxWidth().padding(4.dp),
+                modifier = Modifier.weight(14f).fillMaxWidth(),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-
-                Text(
-                    "Posted by u/${post.author} ${getDate(post.createdUTC.toLong())}",
-                    style = MaterialTheme.typography.caption
-                )
-
-                Text(post.title, style = MaterialTheme.typography.h6)
-
-                when (post.postHint) {
-                    PostHint.HostedVideo.value -> {
-                        post.media?.redditVideo?.fallbackURL?.let { VideoPlayer(it) }
-                        Log.d("VIDEO", post.url)
-                    }
-                    PostHint.Image.value -> {
-                        CoilImage(
-                            imageModel = post.url,
-                            contentScale = ContentScale.FillWidth,
-                            shimmerParams = ShimmerParams(
-                                baseColor = Color.LightGray,
-                                highlightColor = Color.White,
-                                durationMillis = 580,
-                                dropOff = 0.65f,
-                                tilt = 20f,
-                            ),
-                            failure = {
-                                Text("Image request failed")
-                            }
+                Column(
+                    modifier = Modifier.fillMaxWidth().fillMaxSize().padding(4.dp),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "Posted by u/${post.author}",
+                            style = MaterialTheme.typography.caption,
+                            color = Color.Gray
+                        )
+                        Text(
+                            "${getDate(post.createdUTC.toLong())}",
+                            style = MaterialTheme.typography.caption,
+                            color = Color.Gray
                         )
                     }
-                    else -> {
-                        Text(post.urlOverriddenByDest, color = Color.Blue,
-                            textDecoration = TextDecoration.Underline,
-                            modifier = Modifier.clickable {
-                                ContextCompat.startActivity(
-                                    context, Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(post.urlOverriddenByDest)
-                                    ), null
-                                )
-                            })
+
+
+                    Text(post.title, style = MaterialTheme.typography.h6)
+
+
+
+                    when (post.postHint) {
+                        PostHint.HostedVideo.value -> {
+                            post.media?.redditVideo?.fallbackURL?.let { VideoPlayer(it) }
+                            Log.d("VIDEO", post.url)
+                        }
+                        PostHint.Image.value -> {
+                            CoilImage(
+                                imageModel = post.url,
+                                contentScale = ContentScale.FillWidth,
+                                shimmerParams = ShimmerParams(
+                                    baseColor = Color.LightGray,
+                                    highlightColor = Color.White,
+                                    durationMillis = 580,
+                                    dropOff = 0.65f,
+                                    tilt = 20f,
+                                ),
+                                failure = {
+                                    Text("Image request failed")
+                                }
+                            )
+                        }
+                        else -> {
+                            Text(post.urlOverriddenByDest, color = Color.Blue,
+                                textDecoration = TextDecoration.Underline,
+                                modifier = Modifier.clickable {
+                                    ContextCompat.startActivity(
+                                        context, Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse(post.urlOverriddenByDest)
+                                        ), null
+                                    )
+                                })
+                        }
+
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = {}) {
+                        Icon(
+                            Icons.Default.Comment,
+                            Icons.Default.Comment.name,
+                            tint = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.size(4.dp))
+                        Text(
+                            "${post.numComments} Comments",
+                            style = MaterialTheme.typography.caption,
+                            color = Color.Gray
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.End),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(onClick = {}) {
+                            Icon(
+                                Icons.Default.Share,
+                                Icons.Default.Share.name,
+                                tint = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.size(4.dp))
+                            Text(
+                                "Share",
+                                style = MaterialTheme.typography.caption,
+                                color = Color.Gray
+                            )
+                        }
+                        TextButton(onClick = {}) {
+                            Icon(
+                                Icons.Default.Save,
+                                Icons.Default.Share.name,
+                                tint = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.size(4.dp))
+                            Text(
+                                "Save",
+                                style = MaterialTheme.typography.caption,
+                                color = Color.Gray
+                            )
+                        }
+                        IconButton(onClick = {}) {
+                            Icon(
+                                Icons.Default.MoreHoriz,
+                                Icons.Default.More.name,
+                                tint = Color.Gray
+                            )
+                        }
                     }
                 }
+
             }
         }
     }

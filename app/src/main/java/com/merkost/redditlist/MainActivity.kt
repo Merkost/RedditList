@@ -54,11 +54,6 @@ import com.skydoves.landscapist.coil.CoilImage
 import org.koin.androidx.compose.get
 import java.lang.reflect.Array.get
 
-private val Color.Companion.LightBlue: Color
-    get() {
-        return Color(android.graphics.Color.parseColor("#" + "ADD8E6"))
-    }
-
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @ExperimentalAnimationApi

@@ -6,9 +6,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.google.android.exoplayer2.C
 import com.merkost.redditlist.model.datasource.WelcomeDataSource
-import com.merkost.redditlist.model.entity.ChildData
 import com.merkost.redditlist.model.entity.Children
 import com.merkost.redditlist.model.repository.RedditRepository
 import kotlinx.coroutines.flow.Flow
@@ -24,17 +22,17 @@ class MainViewModel(private val repository: RedditRepository): ViewModel() {
         WelcomeDataSource(repository)
     }.flow.cachedIn(viewModelScope)
 
-    init {
-        getTop250Movies()
+    /*init {
+        getRedditPosts()
     }
 
-    private fun getTop250Movies() {
+    private fun getRedditPosts() {
         viewModelScope.launch {
             repository.getHotPosts().collect {
                 if (it.isNotEmpty())
                     currentContent.value = it
             }
         }
-    }
+    }*/
 
 }
