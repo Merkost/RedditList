@@ -25,3 +25,12 @@ fun getDate(timestamp: Long) = Instant.ofEpochSecond(timestamp)
 fun getHours(timestamp: Long) {
     var hours = Math.abs(Date() - getDate(timestamp)) / 36e5;
 }*/
+
+fun getVotesNumber(upvoteRatio: Long): String {
+    return when {
+        upvoteRatio < 1000L -> (upvoteRatio).toString()
+        upvoteRatio in 1000..9999 -> (upvoteRatio / 1000).toString() + "k"
+        upvoteRatio in 10000..99999 -> (upvoteRatio / 10000).toString() + "k"
+        else -> 1.toString()
+    }
+}
