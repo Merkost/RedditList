@@ -39,6 +39,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import com.merkost.redditlist.compose.RedditListScreen
 import com.merkost.redditlist.compose.VideoPlayer
 import com.merkost.redditlist.model.entity.ChildData
 import com.merkost.redditlist.model.entity.Children
@@ -65,135 +66,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             RedditListTheme {
-                // A surface container using the 'background' color from the theme
-                val viewModel: MainViewModel = get()
-
-                val data = viewModel.children
-
-                //val redditList = viewModel.currentContent.collectAsState()
-                Surface(color = Color.LightGray) {
-                    AnimatedVisibility(data == null) {
-                        EmptyView()
-                    }
-                    AnimatedVisibility(data != null) {
-                        val listItems: LazyPagingItems<Children> = data.collectAsLazyPagingItems()
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-
-                            items(listItems) { children ->
-
-                                children?.let {
-                                    RedditItem(it.data)
-                                }
-                            }
-                        }
-                        listItems.apply {
-                            when {
-                                loadState.refresh is LoadState.Loading -> {
-                                    EmptyView()
-                                    //You can add modifier to manage load state when first time response page is loading
-                                }
-                                loadState.append is LoadState.Loading -> {
-                                    EmptyView()
-                                    //You can add modifier to manage load state when next response page is loading
-                                }
-                                loadState.append is LoadState.Error -> {
-                                    //You can use modifier to show error message
-                                }
-                            }
-                        }
-                    }
-                }
+                RedditListScreen()
             }
         }
     }
 }
 
-@Composable
-fun EmptyView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text("Loading hot posts")
-            Spacer(modifier = Modifier.size(8.dp))
-            CircularProgressIndicator()
-        }
-    }
-}
-
-@Composable
-private fun RedditItem(post: ChildData) {
-    val context = LocalContext.current
-
-    Card(modifier = Modifier.padding(4.dp)) {
-
-        Row(modifier = Modifier.fillMaxSize().padding(4.dp)) {
-            Column(
-                modifier = Modifier.fillMaxHeight().weight(2f).fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top,
-
-                ) {
-                IconButton(onClick = { }) {
-                    Icon(Icons.Default.KeyboardArrowUp, "")
-                }
-
-                Text(getVotesNumber(post.score))
-
-                IconButton(onClick = { }) {
-                    Icon(Icons.Default.KeyboardArrowDown, "")
-                }
-
-            }
-            Column(
-                modifier = Modifier.weight(14f).fillMaxWidth().padding(4.dp),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
-            ) {
-
-                Text(
-                    "Posted by u/${post.author} ${getDate(post.createdUTC.toLong())}",
-                    style = MaterialTheme.typography.caption
-                )
-
-                Text(post.title, style = MaterialTheme.typography.h6)
-
-                when (post.postHint) {
-                    PostHint.HostedVideo.value -> {
-                        post.media?.redditVideo?.fallbackURL?.let { VideoPlayer(it) }
-                        Log.d("VIDEO", post.url)
-                    }
-                    PostHint.Image.value -> {
-                        CoilImage(
-                            imageModel = post.url,
-                            contentScale = ContentScale.FillWidth,
-                            shimmerParams = ShimmerParams(
-                                baseColor = Color.LightGray,
-                                highlightColor = Color.White,
-                                durationMillis = 580,
-                                dropOff = 0.65f,
-                                tilt = 20f,
-                            ),
-                            failure = {
-                                Text("Image request failed")
-                            }
-                        )
-                    }
-                    else -> {
-                        Text(post.urlOverriddenByDest, color = Color.Blue,
-                            textDecoration = TextDecoration.Underline,
-                            modifier = Modifier.clickable {
-                                startActivity(
-                                    context, Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(post.urlOverriddenByDest)
-                                    ), null
-                                )
-                            })
-                    }
-                }
-            }
-        }
-    }
-}
