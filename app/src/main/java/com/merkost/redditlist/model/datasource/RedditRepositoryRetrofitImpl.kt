@@ -4,14 +4,16 @@ import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterF
 import com.merkost.redditlist.model.api.RedditDatabaseApiService
 import com.merkost.redditlist.model.entity.ChildData
 import com.merkost.redditlist.model.entity.Children
+import com.merkost.redditlist.model.entity.Welcome1
 import com.merkost.redditlist.model.repository.RedditRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RedditRepositoryRetrofitImpl: RedditRepository {
+class RedditRepositoryRetrofitImpl : RedditRepository {
     companion object {
         private const val BASE_REDDIT_URL = "https://www.reddit.com/"
     }
@@ -19,6 +21,10 @@ class RedditRepositoryRetrofitImpl: RedditRepository {
     override suspend fun getHotPosts(): Flow<List<Children>> = flow {
         val redditResult = getService().getHotPosts()
         emit(redditResult.data.children)
+    }
+
+    override suspend fun getHotPostsPager(after: String?): Welcome1 {
+        return getService().getHotPostsPager(after)
     }
 
     private fun getService(): RedditDatabaseApiService {
@@ -34,8 +40,10 @@ class RedditRepositoryRetrofitImpl: RedditRepository {
             .build()
     }
 
-    private fun createOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder().build()
-    }
+    private fun createOkHttpClient(): OkHttpClient =
+        OkHttpClient.Builder().addInterceptor(getLoggingIntercepter()).build()
+
+    private fun getLoggingIntercepter() =
+        HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC)
 
 }

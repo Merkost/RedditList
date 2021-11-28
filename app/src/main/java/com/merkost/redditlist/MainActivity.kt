@@ -5,10 +5,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.paging.Pager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,8 +34,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.paging.LoadState
+import androidx.paging.PagingConfig
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.merkost.redditlist.compose.VideoPlayer
 import com.merkost.redditlist.model.entity.ChildData
+import com.merkost.redditlist.model.entity.Children
 import com.merkost.redditlist.model.entity.PostHint
 import com.merkost.redditlist.ui.theme.RedditListTheme
 import com.merkost.redditlist.utils.getDate
@@ -50,6 +59,7 @@ private val Color.Companion.LightBlue: Color
     }
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalFoundationApi::class)
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,16 +67,38 @@ class MainActivity : ComponentActivity() {
             RedditListTheme {
                 // A surface container using the 'background' color from the theme
                 val viewModel: MainViewModel = get()
-                val redditList = viewModel.currentContent.collectAsState()
+
+                val data = viewModel.children
+
+                //val redditList = viewModel.currentContent.collectAsState()
                 Surface(color = Color.LightGray) {
-                    AnimatedVisibility(redditList.value.isNullOrEmpty()) {
+                    AnimatedVisibility(data == null) {
                         EmptyView()
                     }
-                    AnimatedVisibility(redditList.value.isNotEmpty()) {
-
+                    AnimatedVisibility(data != null) {
+                        val listItems: LazyPagingItems<Children> = data.collectAsLazyPagingItems()
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            items(redditList.value) { children ->
-                                RedditItem(children.data)
+
+                            items(listItems) { children ->
+
+                                children?.let {
+                                    RedditItem(it.data)
+                                }
+                            }
+                        }
+                        listItems.apply {
+                            when {
+                                loadState.refresh is LoadState.Loading -> {
+                                    EmptyView()
+                                    //You can add modifier to manage load state when first time response page is loading
+                                }
+                                loadState.append is LoadState.Loading -> {
+                                    EmptyView()
+                                    //You can add modifier to manage load state when next response page is loading
+                                }
+                                loadState.append is LoadState.Error -> {
+                                    //You can use modifier to show error message
+                                }
                             }
                         }
                     }
@@ -103,13 +135,13 @@ private fun RedditItem(post: ChildData) {
                 verticalArrangement = Arrangement.Top,
 
                 ) {
-                IconButton(onClick = {  }) {
+                IconButton(onClick = { }) {
                     Icon(Icons.Default.KeyboardArrowUp, "")
                 }
 
                 Text(getVotesNumber(post.score))
 
-                IconButton(onClick = {  }) {
+                IconButton(onClick = { }) {
                     Icon(Icons.Default.KeyboardArrowDown, "")
                 }
 
@@ -152,8 +184,12 @@ private fun RedditItem(post: ChildData) {
                         Text(post.urlOverriddenByDest, color = Color.Blue,
                             textDecoration = TextDecoration.Underline,
                             modifier = Modifier.clickable {
-                                startActivity(context, Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(post.urlOverriddenByDest)), null)
+                                startActivity(
+                                    context, Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(post.urlOverriddenByDest)
+                                    ), null
+                                )
                             })
                     }
                 }
