@@ -3,6 +3,7 @@ package com.merkost.redditlist.model.repository
 import com.merkost.redditlist.model.entity.ChildData
 import com.merkost.redditlist.model.entity.Children
 import com.merkost.redditlist.model.entity.Welcome1
+import com.merkost.redditlist.model.entity.Welcome1Data
 import kotlinx.coroutines.flow.Flow
 
 interface RedditRepository {

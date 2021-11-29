@@ -7,9 +7,41 @@ import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 import java.util.*
 import android.R.attr.end
+import com.merkost.redditlist.model.entity.ChildData
+import com.merkost.redditlist.model.entity.DataMedia
+import com.merkost.redditlist.model.entity.RedditVideo
+import com.merkost.redditlist.model.room.entities.PostData
 import java.time.*
 import java.time.format.FormatStyle
 
+val ChildData.mapToPostData: PostData?
+    get() {
+        return PostData(
+            score=score,
+            author=author,
+            createdUTC=createdUTC.toLong(),
+            title=title,
+            postHint=postHint,
+            videoURL=media?.redditVideo?.fallbackURL ?: "",
+            imgURL=url,
+            url=urlOverriddenByDest,
+            numComments=numComments,
+        )
+    }
+
+val PostData.toChildData: ChildData
+    get() {
+        return ChildData(
+            score = score,
+            author = author,
+            createdUTC = createdUTC.toDouble(),
+            title = title,
+            postHint = postHint,
+            media = DataMedia(redditVideo = RedditVideo(fallbackURL = videoURL)),
+            url = imgURL,
+            numComments = numComments,
+        )
+    }
 
 val Color.Companion.MyLightBlue: Color
     get() {

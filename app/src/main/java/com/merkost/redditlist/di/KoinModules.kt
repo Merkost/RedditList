@@ -2,16 +2,22 @@ package com.merkost.redditlist.di
 
 import com.merkost.redditlist.model.datasource.RedditRepositoryRetrofitImpl
 import com.merkost.redditlist.model.repository.RedditRepository
+import com.merkost.redditlist.model.repository.RepositoryUseCase
+import com.merkost.redditlist.model.room.AppDatabase
+import com.merkost.redditlist.model.room.DatabaseBuilder
+import com.merkost.redditlist.model.room.DatabaseHelper
+import com.merkost.redditlist.model.room.DatabaseHelperImpl
 import com.merkost.redditlist.viewmodels.MainViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val application = module {
-    single<RedditRepository> { RedditRepositoryRetrofitImpl() }
+    single<RedditRepository> { RedditRepositoryRetrofitImpl(); RepositoryUseCase() }
+    single<DatabaseHelper> { DatabaseHelperImpl(DatabaseBuilder.getInstance(get())) }
 }
 
 val mainActivity = module {
-    viewModel { MainViewModel(get()) }
+    viewModel { MainViewModel(get(), get()) }
     //viewModel { MovieDetailsViewModel(get()) }
 }

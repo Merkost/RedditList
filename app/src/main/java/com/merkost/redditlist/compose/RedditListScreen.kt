@@ -35,6 +35,7 @@ import androidx.paging.compose.items
 import com.merkost.redditlist.model.entity.ChildData
 import com.merkost.redditlist.model.entity.Children
 import com.merkost.redditlist.model.entity.PostHint
+import com.merkost.redditlist.model.room.AppDatabase
 import com.merkost.redditlist.utils.*
 import com.merkost.redditlist.viewmodels.MainViewModel
 import com.skydoves.landscapist.ShimmerParams
@@ -48,6 +49,8 @@ fun RedditListScreen() {
     val viewModel: MainViewModel = get()
     val shouldShowLoadingView = remember { mutableStateOf(false) }
     val data = viewModel.children
+
+
 
     //val redditList = viewModel.currentContent.collectAsState()
     Scaffold(backgroundColor = Color.MyLightGray) {

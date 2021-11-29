@@ -8,27 +8,29 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.merkost.redditlist.model.datasource.WelcomeDataSource
 import com.merkost.redditlist.model.entity.Children
-import com.merkost.redditlist.model.repository.RedditRepository
+import com.merkost.redditlist.model.repository.RepositoryUseCase
+import com.merkost.redditlist.model.room.DatabaseHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
-class MainViewModel(private val repository: RedditRepository): ViewModel() {
+class MainViewModel(
+    private val repository: RepositoryUseCase,
+    private val dbHelper: DatabaseHelper
+) : ViewModel() {
 
     val currentContent = MutableStateFlow<List<Children>>(listOf())
 
     val children: Flow<PagingData<Children>> = Pager(PagingConfig(pageSize = 10)) {
-        WelcomeDataSource(repository)
+        WelcomeDataSource(repository, dbHelper)
     }.flow.cachedIn(viewModelScope)
 
     /*init {
-        getRedditPosts()
+        getRedditSavedPosts()
     }
 
-    private fun getRedditPosts() {
+    private fun getRedditSavedPosts() {
         viewModelScope.launch {
-            repository.getHotPosts().collect {
+            dbHelper.getPosts().collect {
                 if (it.isNotEmpty())
                     currentContent.value = it
             }
