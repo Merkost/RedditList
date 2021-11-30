@@ -11,7 +11,11 @@ data class WelcomeRoomData (
     val welcomeDataId: Int? = null,
     val after: String = "",
     @TypeConverters(PostConverter::class)
-    @Embedded
-    val children: List<Post>? = null,
+    @Relation(
+        parentColumn = "welcomeDataId",
+        entityColumn = "welcomeFK",
+        entity = Post::class
+    )
+    val children: List<Post>,
     val before: String? = ""
 )
