@@ -7,8 +7,6 @@ data class Post(
     @PrimaryKey(autoGenerate = true)
     val postId: Int? = null,
     val type: String,
-    val after: String,
-    val before: String? = null,
     @Embedded
     val postData: PostData?
 )

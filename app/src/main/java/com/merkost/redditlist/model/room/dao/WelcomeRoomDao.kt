@@ -6,18 +6,18 @@ import com.merkost.redditlist.model.room.entities.WelcomeRoom
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface WelcomeDao {
+interface WelcomeRoomDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllPosts(posts: WelcomeRoom)
+    suspend fun insertAllPosts(data: List<WelcomeRoom>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPosts(post: WelcomeRoom)
+    suspend fun insertPosts(data: WelcomeRoom)
 
     @Update
-    suspend fun updatePost(post: WelcomeRoom)
+    suspend fun updatePost(data: WelcomeRoom)
 
     @Delete
-    suspend fun deletePost(post: WelcomeRoom)
+    suspend fun deletePost(data: WelcomeRoom)
 
     /*@Query("SELECT * FROM Post ORDER BY created_utc")
     suspend fun getPostsByDate(): List<Post>
@@ -25,6 +25,6 @@ interface WelcomeDao {
     @Query("SELECT * FROM Post ORDER BY score")
     suspend fun getPostsByVotes(): List<Post>*/
 
-    @Query("SELECT * FROM Post")
+    @Query("SELECT * FROM WelcomeRoom")
     fun getPosts(): Flow<WelcomeRoom>
 }

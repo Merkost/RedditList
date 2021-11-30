@@ -3,14 +3,14 @@ package com.merkost.redditlist.model.datasource
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.merkost.redditlist.model.entity.*
-import com.merkost.redditlist.model.repository.RepositoryUseCase
+import com.merkost.redditlist.model.repository.RedditRepository
 import com.merkost.redditlist.model.room.DatabaseHelper
 import kotlinx.coroutines.delay
 import retrofit2.HttpException
 import java.io.IOException
 
 class WelcomeDataSource(
-    private val repository: RepositoryUseCase,
+    private val repository: RedditRepository,
     private val dbHelper: DatabaseHelper
 ) : PagingSource<String, Children>() {
 
@@ -54,7 +54,7 @@ class WelcomeDataSource(
 
             delay(5000)
 
-            val welcomeData = repository.getPostsPager(after = nextPage)
+            val welcomeData = repository.getHotPostsPager(after = nextPage)
 
 
             if (!isFirstRun) delay(5000) else isFirstRun = !isFirstRun

@@ -1,18 +1,17 @@
 package com.merkost.redditlist.model.room.entities
 
-import androidx.room.Entity
+import androidx.room.*
 import com.google.gson.annotations.SerializedName
 import com.merkost.redditlist.model.entity.Children
+import com.merkost.redditlist.model.room.PostConverter
 
 @Entity
 data class WelcomeRoomData (
+    @PrimaryKey(autoGenerate = true)
+    val welcomeDataId: Int? = null,
     val after: String = "",
-    val dist: Long = 0,
-    val modhash: String = "",
-
-    @SerializedName("geo_filter")
-    val geoFilter: Any? = null,
-
-    val children: List<Post>,
-    val before: Any? = null
+    @TypeConverters(PostConverter::class)
+    @Embedded
+    val children: List<Post>? = null,
+    val before: String? = ""
 )

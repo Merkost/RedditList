@@ -4,17 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.merkost.redditlist.model.room.dao.WelcomeDao
-import com.merkost.redditlist.model.room.entities.Post
-import com.merkost.redditlist.model.room.entities.PostData
-import com.merkost.redditlist.model.room.entities.WelcomeRoom
-import com.merkost.redditlist.model.room.entities.WelcomeRoomData
+import com.merkost.redditlist.model.room.dao.WelcomeRoomDao
+import com.merkost.redditlist.model.room.entities.*
 
-@Database(entities = [WelcomeRoom::class, WelcomeRoomData::class,
-    Post::class, PostData::class], version = 2)
+@Database(
+    entities = [WelcomeRoom::class, WelcomeRoomData::class,
+        Posts::class, Post::class, PostData::class], version = 3
+)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun welcomeDao(): WelcomeDao
+    abstract fun welcomeRoomDao(): WelcomeRoomDao
 
 }
 
@@ -35,7 +34,7 @@ object DatabaseBuilder {
         Room.databaseBuilder(
             context.applicationContext,
             AppDatabase::class.java,
-            "mindorks-example-coroutines"
+            "myDB"
         ).fallbackToDestructiveMigration().build()
 
 }

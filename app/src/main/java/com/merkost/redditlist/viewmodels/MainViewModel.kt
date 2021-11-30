@@ -8,13 +8,13 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.merkost.redditlist.model.datasource.WelcomeDataSource
 import com.merkost.redditlist.model.entity.Children
-import com.merkost.redditlist.model.repository.RepositoryUseCase
+import com.merkost.redditlist.model.repository.RedditRepository
 import com.merkost.redditlist.model.room.DatabaseHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainViewModel(
-    private val repository: RepositoryUseCase,
+    private val repository: RedditRepository,
     private val dbHelper: DatabaseHelper
 ) : ViewModel() {
 

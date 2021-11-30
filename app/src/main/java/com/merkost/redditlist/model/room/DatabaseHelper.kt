@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface DatabaseHelper {
 
-    suspend fun getPosts(): Flow<WelcomeRoom>
+    suspend fun getPosts(): Flow<List<WelcomeRoom>>
 /*    suspend fun getPostsByTime(): List<Post>
     suspend fun getPostsByScore(): List<Post>*/
 
-    //suspend fun insertAll(posts: List<WelcomeRoom>)
+    suspend fun insertAll(posts: List<WelcomeRoom>)
     suspend fun insertPosts(post: WelcomeRoom)
 
 }
