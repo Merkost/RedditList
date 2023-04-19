@@ -26,14 +26,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.merkost.redditlist.model.entity.ChildData
-import com.merkost.redditlist.model.entity.Children
 import com.merkost.redditlist.model.entity.PostHint
 import com.merkost.redditlist.utils.*
 import com.merkost.redditlist.viewmodels.MainViewModel
@@ -47,55 +44,53 @@ fun RedditListScreen() {
     // A surface container using the 'background' color from the theme
     val viewModel: MainViewModel = get()
     val shouldShowLoadingView = remember { mutableStateOf(false) }
-    val data = viewModel.children
+    val data = viewModel.children.collectAsLazyPagingItems()
 
     //val redditList = viewModel.currentContent.collectAsState()
     Scaffold(backgroundColor = Color.MyLightGray) {
-        ConstraintLayout {
-            val (list, loadingView) = createRefs()
-
+        Box(modifier = Modifier.fillMaxWidth().padding(it)) {
             AnimatedVisibility(
                 visible = shouldShowLoadingView.value,
                 enter = fadeIn(animationSpec = tween(300)),
                 exit = fadeOut(animationSpec = tween(300)),
-                modifier = Modifier.constrainAs(loadingView) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                }.zIndex(5f)
+                modifier = Modifier
+                    .zIndex(5f)
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
             ) {
                 LoadingView(
                     modifier = Modifier.wrapContentSize(),
                 )
             }
 
-            val listItems: LazyPagingItems<Children> = data.collectAsLazyPagingItems()
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier.fillMaxSize().zIndex(1f).constrainAs(list) {
-                    top.linkTo(parent.top)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                    bottom.linkTo(parent.bottom)
-                }) {
-                items(listItems) { children ->
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(1f)
+            ) {
+                items(data, key = { it.data.id }) { children ->
                     children?.let {
                         RedditItem(it.data)
                     }
                 }
             }
-            listItems.apply {
+            data.apply {
                 when {
                     loadState.refresh is LoadState.Loading -> {
                         EmptyView()
                         //You can add modifier to manage load state when first time response page is loading
                     }
+
                     loadState.append is LoadState.Loading -> {
                         shouldShowLoadingView.value = true
                         //You can add modifier to manage load state when next response page is loading
                     }
+
                     loadState.append is LoadState.Error -> {
                         //You can use modifier to show error message
                     }
+
                     loadState.append is LoadState.NotLoading -> {
                         shouldShowLoadingView.value = false
                     }
@@ -117,12 +112,14 @@ fun LoadingView(modifier: Modifier) {
                     durationMillis = 300,
                     easing = LinearOutSlowInEasing
                 )
-            ).padding(4.dp),
+            )
+            .padding(4.dp),
     ) {
         Row(
             modifier = Modifier
                 .wrapContentSize()
-                .padding(6.dp).padding(horizontal = 2.dp),
+                .padding(6.dp)
+                .padding(horizontal = 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -164,7 +161,11 @@ private fun RedditItem(post: ChildData) {
 
         Row(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxHeight().weight(2f).fillMaxWidth().background(Color.MyLightBlue),
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(2f)
+                    .fillMaxWidth()
+                    .background(Color.MyLightBlue),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
 
@@ -181,18 +182,25 @@ private fun RedditItem(post: ChildData) {
 
             }
             Column(
-                modifier = Modifier.weight(14f).fillMaxWidth(),
+                modifier = Modifier
+                    .weight(14f)
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().fillMaxSize().padding(4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxSize()
+                        .padding(4.dp),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth(),
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically) {
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             "Posted by u/${post.author}",
                             style = MaterialTheme.typography.caption,
@@ -215,6 +223,7 @@ private fun RedditItem(post: ChildData) {
                             post.media?.redditVideo?.fallbackURL?.let { VideoPlayer(it) }
                             Log.d("VIDEO", post.url)
                         }
+
                         PostHint.Image.value -> {
                             CoilImage(
                                 imageModel = post.url,
@@ -231,6 +240,7 @@ private fun RedditItem(post: ChildData) {
                                 }
                             )
                         }
+
                         else -> {
                             Text(post.urlOverriddenByDest, color = Color.Blue,
                                 textDecoration = TextDecoration.Underline,

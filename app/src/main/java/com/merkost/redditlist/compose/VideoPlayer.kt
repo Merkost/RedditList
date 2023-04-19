@@ -14,16 +14,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 
 @Composable
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun VideoPlayer(sourceUrl: String) {
     // This is the official way to access current context from Composable functions
     val context = LocalContext.current
@@ -31,8 +33,11 @@ fun VideoPlayer(sourceUrl: String) {
     // Do not recreate the player everytime this Composable commits
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(context,
-                Util.getUserAgent(context, context.packageName))
+            val defaultDataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(context)
+            val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
+                context,
+                defaultDataSourceFactory
+            )
 
             val source = ProgressiveMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(
@@ -43,7 +48,7 @@ fun VideoPlayer(sourceUrl: String) {
                 ))
 
             setMediaSource(source)
-
+            videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
             playbackState;
             playWhenReady = true
             repeatMode = Player.REPEAT_MODE_ALL;
@@ -51,11 +56,12 @@ fun VideoPlayer(sourceUrl: String) {
         }
     }
 
-    VideoPlayer(modifier = Modifier.height(250.dp), exoPlayer = exoPlayer)
+    VideoPlayer(modifier = Modifier, exoPlayer = exoPlayer)
 
 }
 
 @Composable
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun VideoPlayer(modifier: Modifier = Modifier, exoPlayer: ExoPlayer) {
     val context = LocalContext.current
 
@@ -100,8 +106,9 @@ fun VideoPlayer(modifier: Modifier = Modifier, exoPlayer: ExoPlayer) {
                                 ViewGroup.LayoutParams
                                     .MATCH_PARENT
                             )
-                        controllerAutoShow = true
-                        controllerHideOnTouch = true
+                        controllerAutoShow = false
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        useController = false
                         //useController = false
                     }
                 }

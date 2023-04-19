@@ -25,14 +25,13 @@ class WelcomeDataSource(private val repository: RedditRepository) : PagingSource
 
             val welcomeData = repository.getHotPostsPager(after = nextPage)
 
-            if (!isFirstRun) delay(5000) else isFirstRun = !isFirstRun
+            if (!isFirstRun) delay(5000) else isFirstRun = isFirstRun.not()
 
             LoadResult.Page(
                 data = welcomeData.data.children,
                 prevKey = if (nextPage != null) welcomeData.data.before as String? else null,
                 nextKey = if (welcomeData.data.children.isEmpty()) null else welcomeData.data.after
             )
-
         } catch (exception: IOException) {
             return LoadResult.Error(exception)
         } catch (exception: HttpException) {
